@@ -10,8 +10,7 @@ Built with **FastAPI + LangGraph** (multi-agent pipeline) on the backend, and **
 ---
 
 ## **🔗 Quick Links**
-- 🌐 Live Demo — *add your deployed frontend URL here*
-- ⚙️ API — *add your deployed Render URL here*
+- 🌐 Live Demo — *resu-match-sepia.vercel.app*
 - 💻 Source Code — You're already here!
 
 ---

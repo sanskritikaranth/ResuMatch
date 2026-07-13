@@ -1,70 +1,151 @@
-﻿# ResuMatch Pro
+﻿#📄 ResuMatch Pro
+ 
+An AI-powered resume builder that tailors your resume to a specific job description — extracting keywords, rewriting your content, and scoring it for ATS compatibility, all in one flow.
 
-AI-powered resume optimization tool. You provide your raw experience, education,
-and a target job description; a 4-agent pipeline analyzes the JD, rewrites your
-resume to match it, and grades the result like an ATS scanner would — all before
-you export a polished, print-ready PDF.
+Built with FastAPI + LangGraph (multi-agent pipeline) on the backend, and React + Vite on the frontend. Feed it your details and a job description, and ResuMatch Pro runs a 4-agent "war room" that validates your input, analyzes the JD, rewrites your resume content, and audits it against ATS scoring — then renders it into a polished, downloadable PDF.
 
-## How it works
+🔗 Quick Links
+🌐 Live Demo	*add your deployed frontend URL here*
+⚙️ API	*add your deployed Render URL here*
+💻 Source Code	You're already here!
 
-Every submission runs through a small agent graph (built with LangGraph), not a
-single prompt call:
+✨ Features
+🧠 Agentic Resume Pipeline
+Powered by LangGraph, requests flow through four specialized agents:
+- **Gatekeeper (Validator)** — checks the submitted data is complete and sane before spending an LLM call on it
+- **JD Analyst** — extracts the key skills/keywords from the pasted job description
+- **Content Strategist** — rewrites your experience, projects, and skills to align with those keywords
+- **ATS Auditor** — scores the final resume for ATS-friendliness and returns actionable feedback
 
-1. **Validator** — rejects gibberish/placeholder input before burning API calls.
-2. **JD Analyst** — extracts the 6 most critical skills/keywords from the target job description.
-3. **Content Strategist** — rewrites your raw input into resume copy, weaving in the extracted keywords.
-4. **ATS Auditor** — scores the final draft 0-100 against the job description and gives specific feedback.   
-ResuMatch/
-+-- main.py              # FastAPI app, /generate endpoint
-+-- agents.py             # LangGraph agent pipeline
-+-- requirements.txt
-+-- render.yaml            # Render deployment config
-+-- frontend/
-+-- src/
-+-- App.jsx                  # Multi-step form + state
-+-- TemplateProfessional.jsx # Resume layout components
-+-- TemplateDouble.jsx
-+-- TemplateCreative.jsx
-+-- TemplateBasic.jsx
-## Running locally
+Every LLM call is wrapped in a safe structured-output handler, so a malformed model response fails loudly with a clear error instead of crashing silently downstream.
 
-**Backend**
+📝 Resume Input
+Single form capturing industry, contact details, education, experience, projects, skills, extracurriculars, and the target job description
+
+🎨 Templates
+Four downloadable resume layouts to choose from — Basic, Creative, Double-column, and Professional
+
+📊 ATS Scoring
+Get a numeric ATS-compatibility score plus specific feedback on what to improve, and the keyword list the Content Strategist optimized for
+
+📥 Export
+One-click PDF export via html2pdf.js — no watermarks, ready to send
+
+🛠️ Tech Stack
+| Layer | Technology |
+|---|---|
+| Backend Framework | FastAPI |
+| Agent Orchestration | LangGraph |
+| LLM | OpenAI (gpt-4o-mini) via langchain-openai |
+| Backend Server | Uvicorn |
+| Frontend Framework | React 19 + Vite |
+| Styling | Tailwind CSS |
+| Icons | Lucide React |
+| PDF Export | html2pdf.js |
+| Backend Hosting | Render |
+| Frontend Hosting | Vercel (or any static host) |
+
+🔑 How It Works
+1. Fill in your details (name, contact info, education, experience, projects, skills, extracurriculars) and paste the job description you're targeting
+2. Hit generate — the request hits `POST /generate` on the FastAPI backend
+3. The LangGraph pipeline runs: **Validate → Analyze JD → Rewrite Content → Audit ATS Score**
+4. If validation fails or any agent errors out, you get a clear message back instead of a broken result
+5. On success, you get back the optimized resume content, an ATS score, feedback, and the extracted keywords
+6. Pick a template and export straight to PDF
+
+🚀 Getting Started
+
+Prerequisites
+- Python 3.11+
+- Node.js 18+
+- An OpenAI API key
+
+1️⃣ Clone the repo
 ```bash
-cd ResuMatch
+git clone https://github.com/yourusername/resumatch-pro.git
+cd resumatch-pro
+```
+
+2️⃣ Backend setup
+```bash
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+# Windows: .venv\Scripts\activate | macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # then paste your OPENAI_API_KEY into .env
+```
+
+Create a `.env` file in the project root (never commit this — it's already in `.gitignore`):
+```
+OPENAI_API_KEY=your_openai_api_key_here
+ALLOWED_ORIGINS=http://localhost:5173
+```
+
+Run the API:
+```bash
 uvicorn main:app --reload
 ```
-Backend runs at `http://127.0.0.1:8000`. Visit `/docs` for the interactive Swagger UI.
+API will be live at `http://localhost:8000` — health check at `/`.
 
-**Frontend** (separate terminal)
+3️⃣ Frontend setup
 ```bash
-cd ResuMatch/frontend
+cd frontend
 npm install
-cp .env.example .env        # VITE_API_URL=http://127.0.0.1:8000 by default
+```
+
+Create a `frontend/.env`:
+```
+VITE_API_URL=http://localhost:8000
+```
+
+Run the dev server:
+```bash
 npm run dev
 ```
-Frontend runs at `http://localhost:5173`.
+App will be live at `http://localhost:5173`.
 
-## Deployment
+📦 Deployment
 
-**Backend to Render**
-1. Push this repo to GitHub.
-2. New -> Web Service on Render, point it at the repo (root directory: `ResuMatch`).
-3. Render will pick up `render.yaml` automatically, or set manually:
-   - Build command: `pip install -r requirements.txt`
-   - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-4. Add environment variables: `OPENAI_API_KEY`, and `ALLOWED_ORIGINS` (your Vercel URL, added after the step below).
+⚙️ Backend (Render)
+A `render.yaml` blueprint is already included. In the Render dashboard: **New → Blueprint**, connect this repo, and fill in the `OPENAI_API_KEY` and `ALLOWED_ORIGINS` environment variables when prompted.
 
-**Frontend to Vercel**
-1. New Project on Vercel, point it at the repo, root directory: `ResuMatch/frontend`.
-2. Framework preset: Vite.
-3. Add environment variable `VITE_API_URL` = your Render backend URL.
-4. Deploy, then copy the resulting Vercel URL back into Render's `ALLOWED_ORIGINS`.
+🌐 Frontend (Vercel)
+```bash
+cd frontend
+npm run build
+```
+Or connect the repo to Vercel directly with **Root Directory** set to `frontend` — it auto-detects Vite. Set `VITE_API_URL` to your deployed backend URL.
 
-## Roadmap / ideas for next iteration
-- Persist generated resumes (DB) so users can revisit past drafts
-- Auth so users can save multiple resume versions
-- Cover letter generation as a 5th agent
+⚠️ After deploying the frontend, update `ALLOWED_ORIGINS` on the backend to include your frontend's live URL so CORS allows requests through.
+
+📁 Project Structure
+```
+ResuMatch/
+├── main.py                    # FastAPI app, CORS config, /generate endpoint
+├── agents.py                  # LangGraph pipeline: validator, JD analyst,
+│                               #   content strategist, ATS auditor
+├── requirements.txt
+├── render.yaml                 # Render deployment blueprint
+└── frontend/
+    ├── src/
+    │   ├── App.jsx              # Main form + generation flow
+    │   ├── TemplateBasic.jsx
+    │   ├── TemplateCreative.jsx
+    │   ├── TemplateDouble.jsx
+    │   └── TemplateProfessional.jsx
+    ├── package.json
+    └── vite.config.js
+```
+
+🗺️ Roadmap / Future Improvements
+- [ ] User accounts to save past resumes
+- [ ] More template styles
+- [ ] Cover letter generation
+- [ ] Multi-language support
+- [ ] Resume version history / diffing
+
+📄 License
+This project is open source and available for personal and educational use.
+
+🙋 Author
+Built by **SANSKRITI KARANTH** — 4th year ISE student.
+
+⭐ If you found this project interesting, consider giving it a star!

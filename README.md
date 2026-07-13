@@ -38,11 +38,6 @@ Four downloadable resume layouts to choose from: **Basic, Creative, Double-colum
 
 ---
 
-## **📊 ATS Scoring**
-Get a numeric ATS-compatibility score plus specific feedback on what to improve, and the keyword list the Content Strategist optimized for.
-
----
-
 ## **📥 Export**
 One-click PDF export via **html2pdf.js** — no watermarks, ready to send.
 
